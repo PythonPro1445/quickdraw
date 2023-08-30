@@ -1,0 +1,124 @@
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/css/bootstrap.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/js/bootstrap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.0.0/p5.js"></script>
+    <script src="https://unpkg.com/ml5@0.4.3/dist/ml5.min.js"></script>
+    <title>Quick Draw</title>
+</head>
+<body background="background.jpg">
+    <center>
+        <div>
+            <form style="background-color: white; height: 100px; border-radius: 20px; width: 1000px;" id="forms">
+            <h1 style="color:black; font-size: 65px;">Quick Draw Single-Player</h1>
+            </form>            
+        </div>
+        
+        <br><br><br><br>
+        <form style="background-color: white; height: 750px ; border-radius: 20px; width: 1800; padding-right: 50px;" id="form">
+        <section>
+                <h1 style="font-size: 30px; color: black; padding-top: 200px; padding-left: 1400px;">Score</h1>
+                <h1 style="font-size: 100px; color: black; padding-left: 1410;">0</h1>
+
+                <h1 style="padding-left: 1400px;">Timer</h1> <span id="timer" style="padding-left: 1400px;"></span>
+            <p id="label"  style="font-size: 25px; padding-left: 1400px;">Label  : </p>
+            <p id="confidence"  style="font-size: 25px; padding-left: 1400px;">Confidence  :  </p>
+            <button class="btn btn-danger btn-lg" onclick="clearCanvas()" style="padding-top: 100px;">Clear Canvas</button>           
+            <h1 style="margin-bottom: 1000px; margin-right: 1400px; ">Sketch to Draw</h1> 
+        </section>
+        </form>
+    </center>  
+    
+</body>
+        <style>
+            #form {
+                animation-name: background-thing;
+                animation-iteration-count: infinite;
+                animation-duration: 6s;                
+            }
+
+            #forms {
+                border:5px solid;
+            }
+
+            @keyframes background-thing {
+                from{box-shadow: 2px 2px 100px red;}
+                to{box-shadow: 2px 2px 100px yellow;}
+            }
+
+            canvas{
+                border-radius: 20px;
+                
+            }
+        </style>
+        <script>
+            let timerValue = 60; // Set the initial time in seconds
+    let timerInterval; // Variable to store the interval ID
+
+    function startTimer() {
+        timerInterval = setInterval(updateTimer, 1000); // Update the timer every 1 second (1000 milliseconds)
+    }
+
+    function updateTimer() {
+        if (timerValue > 0) {
+            timerValue--;
+            document.getElementById("timer").textContent = timerValue;
+        } else {
+            // The timer has reached 0, you can add game over logic here
+            clearInterval(timerInterval); // Stop the timer
+        }
+    }
+            
+            function setup() 
+            {
+                canvas = createCanvas(1000,500);
+                canvas.center();
+                background("white");
+                canvas.mouseReleased(classifyCanvas);
+                synth = window.speechSynthesis;
+                startTimer()
+            }
+
+            function preload()
+            {
+                classifier = ml5.imageClassifier('DoodleNet');
+            }
+
+            function clearCanvas()
+            {
+                background("white")
+            }
+
+            function draw() 
+            {
+                strokeWeight(13);
+                stroke(0);
+                if (mouseIsPressed) {
+                    line(pmouseX,pmouseY,mouseX,mouseY);                
+                }
+
+            }
+
+            function classifyCanvas()
+            {
+                classifier.classify(canvas,gotresult);
+            }
+
+            function gotresult(error,results)
+            {
+                if(error) {
+                    console.log(error);
+                }
+                console.log(results);
+                document.getElementById("label").innerHTML = 'Label:  ' + results[0].label;
+                document.getElementById("confidence").innerHTML = 'Confidence:  ' + Math.round(results[0].confidence * 100) + '%';
+                utterThis = new SpeechSynthesisUtterance(result[0].label);
+                synth.speak(utterThis);
+            }
+
+            
+        </script>
+</html>
